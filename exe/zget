@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+
+require "optparse"
+require "zget"
+
+options = {}
+
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename __FILE__} [options] file_or_alias [output]"
+
+  opts.on "-h", "--help", "Show this message" do
+    puts opts.help
+    exit
+  end
+
+  opts.on "-v", "--version", "Show version" do
+    puts "#{File.basename __FILE__} #{Zget::VERSION}"
+    exit
+  end
+end
+
+parser.parse!
+
+if ARGV.size > 2
+  puts parser.help
+  exit
+end
+
+options[:file_or_alias] = ARGV.first
+options[:output] = ARGV.size == 2 ? ARGV.last : nil
+
+Zget.get options
+

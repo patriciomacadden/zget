@@ -1,0 +1,51 @@
+#!/usr/bin/env ruby
+
+require "optparse"
+require "zget"
+
+options = {}
+
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: #{File.basename __FILE__} [options] file [alias]"
+
+  opts.on "-b", "--bind-address BIND_ADDRESS", "The address to share the file on (default: 0.0.0.0)" do |bind_address|
+    options[:bind_address] = bind_address
+  end
+
+  opts.on "-h", "--help", "Show this message" do
+    puts opts.help
+    exit
+  end
+
+  opts.on "-p", "--port PORT", Integer, "The port to share the file on (default: 6666)" do |port|
+    options[:port] = port
+  end
+
+  opts.on "-v", "--version", "Show version" do
+    puts "#{File.basename __FILE__} #{Zget::VERSION}"
+    exit
+  end
+end
+
+parser.parse!
+
+if ARGV.none? || ARGV.size > 2
+  puts parser.help
+  exit
+end
+
+options[:file] = ARGV.first
+if ARGV.size == 2
+  options[:_alias] = ARGV.last
+end
+
+begin
+  Zget.put options
+rescue IPAddr::InvalidAddressError
+  puts "Invalid bind address"
+rescue Zget::InvalidFileError
+  puts "Invalid file"
+rescue Zget::InvalidPortError
+  puts "Invalid port"
+end
+
